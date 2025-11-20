@@ -32,12 +32,12 @@ Non-negotiable rules:
 RESEARCHER_PROMPT = """Write one outstanding section (300–600 words) titled exactly:
 {section_title}
 
-Make deep causal claims, cite primary sources when possible, include ≥2 counterfactuals, apply Nietzschean lens where power dynamics appear. Tag every claim properly. You MUST include ≥3 real primary-source citations per section (e.g. Napoleon’s Correspondence Vol. X No. YYYY, British customs records, etc) and ≥2 detailed counterfactuals. If you cannot, say so explicitly. Output only clean markdown."""
+Make deep causal claims, cite primary sources when possible, include ≥2 counterfactuals, apply Nietzschean lens where power dynamics appear. Tag every claim properly. You MUST include ≥3 REAL primary-source citations with exact volume/edition/page or letter number (e.g. Correspondance de Napoléon Ier, Vol. 13, No. 10984). If you do not know the exact reference, write <<NEEDS VERIFICATION: [claim]>> instead of guessing. per section (e.g. Napoleon’s Correspondence Vol. X No. YYYY, British customs records, etc) and ≥2 detailed counterfactuals. If you cannot, say so explicitly. Output only clean markdown."""
 
 CRITIC_PROMPT = """You are a hostile peer reviewer whose only job is to destroy weak claims.
 
 Attack everything: missing sources, weak causation, moralizing, missing incentives, no counterfactuals.
-Assign an Epistemic Rigor Score 0–100. Score <92 is unacceptable — demand primary-source citations (e.g. Napoleon Correspondence vol/edition, British Parliamentary Papers, etc) and ≥2 strong counterfactuals per major claim..
+Assign an Epistemic Rigor Score 0–100. Score <92 is unacceptable. Any hallucinated or fake primary-source citation (wrong volume, made-up letter number) automatically drops the score to ≤60. Demand honesty. — demand primary-source citations (e.g. Napoleon Correspondence vol/edition, British Parliamentary Papers, etc) and ≥2 strong counterfactuals per major claim..
 If score <92, demand specific fixes.
 Output in clear markdown bullets."""
 
