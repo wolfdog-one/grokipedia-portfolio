@@ -15,7 +15,7 @@ python3 grokipedia_agent.py
 ```
 python3 generate_synthetic_data.py
 ```
-→ 220+ Q&A / chain-of-thought / preference pairs for fine-tuning/evals → `synthetic_data_*.jsonl`
+→ 50 Q&A / chain-of-thought / preference pairs for fine-tuning/evals → `synthetic_data_*.jsonl`
 
 ### Sample article (generated live today)
 [Hard vs Soft Money in Civilizational Outcomes](latest_grokipedia_article.md)
