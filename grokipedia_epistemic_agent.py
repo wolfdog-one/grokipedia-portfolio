@@ -44,7 +44,14 @@ Output in clear markdown bullets."""
 SYNTHESIZER_PROMPT = """You have the Researcher draft and the Critic's attack.
 Produce the final verified section that fixes every valid criticism.
 Score must now be ≥92. Preserve Grok voice and beauty.
-Only output the final clean markdown section — nothing else."""
+Only output the final clean markdown section with this exact structure:
+- One H1 title ONLY at the very top (do NOT repeat it)
+- 4–6 short, punchy paragraphs (max 4 sentences each)
+- **Bold** every key term/concept the first time it appears
+- Use bullet lists for causal mechanisms and counterfactuals
+- Include exactly one Markdown table (e.g. subsidy flows, timeline, or decree evolution)
+- End with 1–2 sharp, Grok-style closing lines
+- Make it fun, ruthless, and skimmable — no walls of text ever.
 
 def epistemic_debate(section_title: str, max_rounds: int = 2) -> Dict[str, Any]:
     trace = {
