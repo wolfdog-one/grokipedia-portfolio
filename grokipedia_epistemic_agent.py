@@ -118,7 +118,13 @@ def epistemic_debate_with_verifier(section_title: str, max_rounds: int = 2) -> D
     ], temperature=0.0)
 
     trace["verifier"] = verified
-    trace["final_section_verified"] = final_text + "\n\n### Verification Report\n" + verified
+    import re
+
+    # Strip duplicate H1
+    final_stripped = re.sub(r"^# .*
+
+# ", "# ", trace["final_section"], flags=re.MULTILINE)
+    trace["final_section_verified"] = final_stripped +  "\n\n### Verification Report\n" + verified
 
     # Overwrite the saved article with verified version
     with open(f"articles/v2_napoleon/01_continental_system.md", "w") as f:
