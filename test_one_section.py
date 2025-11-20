@@ -1,3 +1,4 @@
+from grokipedia_epistemic_agent import epistemic_debate_with_verifier
 from grokipedia_epistemic_agent import epistemic_debate
 import json
 import os
