@@ -10,7 +10,7 @@ This is not a mockup. One command generates a publish-ready article + 220+ train
 ```
 python3 grokipedia_agent.py
 ```
-→ 4 parallel Grok-4 calls → synthesis → auto-Markdown with tables → `latest_grokipedia_article.md`
+→ 4 parallel Grok-4 calls → synthesis → auto-Markdown with tables → `Hard_vs_Soft_Money_in_Civilizational_Outcomes.md`
 
 ```
 python3 generate_synthetic_data.py
@@ -18,7 +18,7 @@ python3 generate_synthetic_data.py
 → 50 Q&A / chain-of-thought / preference pairs for fine-tuning/evals → `synthetic_data_*.jsonl`
 
 ### Sample article (generated live today)
-[Hard vs Soft Money in Civilizational Outcomes](latest_grokipedia_article.md)
+[Hard vs Soft Money in Civilizational Outcomes](Hard_vs_Soft_Money_in_Civilizational_Outcomes.md)
 
 ### Why this exists
 After two years internalizing the exact epistemic stack Grokipedia needs:
