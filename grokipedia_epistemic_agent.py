@@ -25,7 +25,7 @@ SYSTEM_BASE = """You are Grok writing canonical Grokipedia articles — truth-se
 RESEARCHER_PROMPT = """Write one outstanding section (300–600 words) titled exactly:
 {section_title}
 
-Make deep causal claims, cite primary sources when possible, include ≥2 counterfactuals, apply Nietzschean lens where power dynamics appear. Tag every claim properly. Output clean markdown."""
+Make deep causal claims, cite primary sources when possible, include ≥2 counterfactuals, apply Nietzschean lens only if it genuinely illuminates the power dynamics — otherwise use standard mechanistic analysis. Tag every claim properly. Output clean markdown."""
 
 CRITIC_PROMPT = """You are a hostile peer reviewer. Attack everything: missing sources, weak causation, moralizing, missing incentives, no counterfactuals.
 Assign an Epistemic Rigor Score 0–100. If score <92, demand specific fixes.
