@@ -95,3 +95,34 @@ def epistemic_debate(section_title: str, max_rounds: int = 2) -> Dict[str, Any]:
 
     trace["final_section"] = current
     return trace
+
+# === ADD THIS AT THE VERY END OF THE FILE (after the epistemic_debate function) ===
+
+VERIFIER_PROMPT = """You are the Verifier agent with access to primary historical sources.
+Your only job: for every claim in the Synthesizer output, write one of these:
+- [VERIFIED] Exact source: Correspondance de Napoléon Ier, Vol. XX, letter No. YYYY, date
+- [VERIFIED] Exact source: British Parliamentary Papers 18XX, vol. XX, p. YY
+- [UNVERIFIED – plausible but needs lookup]
+- [FALSE – contradicts known primary record]
+
+Be brutally honest. If you don't know the exact volume/letter/page, say UNVERIFIED."""
+
+def epistemic_debate_with_verifier(section_title: str, max_rounds: int = 2) -> Dict[str, Any]:
+    trace = epistemic_debate(section_title, max_rounds)  # reuse existing function
+    final_text = trace["final_section"]
+
+    print("\nRunning Verifier agent on final section...")
+    verified = call_llm([
+        {"role": "system", "content": SYSTEM_BASE + "\n" + VERIFIER_PROMPT},
+        {"role": "user", "content": final_text}
+    ], temperature=0.0)
+
+    trace["verifier"] = verified
+    trace["final_section_verified"] = final_text + "\n\n### Verification Report\n" + verified
+
+    # Overwrite the saved article with verified version
+    with open(f"articles/v2_napoleon/01_continental_system.md", "w") as f:
+        f.write(f"# {section_title}\n\n{trace['final_section_verified']}")
+
+    print("FULLY VERIFIED SECTION SAVED WITH VERIFIER REPORT")
+    return trace

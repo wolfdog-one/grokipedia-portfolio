@@ -7,7 +7,7 @@ section_title = "Napoleon’s Continental System as Proto-Central-Bank Warfare (
 os.makedirs("traces/v2_napoleon", exist_ok=True)
 os.makedirs("articles/v2_napoleon", exist_ok=True)
 
-trace = epistemic_debate(section_title, max_rounds=2)
+trace = epistemic_debate_with_verifier(section_title, max_rounds=2)
 
 with open(f"traces/v2_napoleon/01_continental_system_trace.json", "w") as f:
     json.dump(trace, f, indent=2)
