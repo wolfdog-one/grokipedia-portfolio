@@ -32,7 +32,14 @@ Assign an Epistemic Rigor Score 0–100. If score <92, demand specific fixes.
 Output in clear markdown bullets."""
 
 SYNTHESIZER_PROMPT = """Only output the final clean markdown section with this exact structure:
-- One H1 title ONLY at the very top (do NOT repeat it)
+- DO NOT output any H1 title at all — the script adds it later.
+Use this exact structure:
+- 4–6 short paragraphs (max 4 sentences each)
+- **Bold** every important term the first time
+- Bullet lists for mechanisms and counterfactuals
+- Exactly one Markdown table with real data
+- End with 1–2 sharp Grok lines
+- Make it skimmable, ruthless, fun — NO WALLS OF TEXT
 - 4–6 short, punchy paragraphs (max 4 sentences each)
 - **Bold** every key term/concept the first time it appears
 - Use bullet lists for causal mechanisms and counterfactuals
@@ -103,7 +110,9 @@ def epistemic_debate_with_verifier(section_title: str, max_rounds: int = 2) -> D
     ], temperature=0.0)
 
     # Strip duplicate H1 if present
-    final_clean = re.sub(r"^# .*?\n\n# ", "# ", final_text, flags=re.MULTILINE)
+        # Remove any H1 title the model might have added (case-insensitive, any spacing)
+    final_clean = re.sub(r"^#.*Napoleon.*\n+\s*#?", "", final_text, count=1, flags=re.MULTILINE)
+    final_clean = final_clean.strip() + "\n\n"
 
     trace["verifier"] = verified
     trace["final_section_verified"] = final_clean + "\n\n### Verification Report\n" + verified
