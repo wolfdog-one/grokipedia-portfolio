@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 import openai
 
-client = openai.OpenAI(api_key=os.getenv("XAI_API_KEY"))
+client = openai.OpenAI(api_key=os.getenv("XAI_API_KEY"), base_url="https://api.x.ai/v1")
 MODEL = "grok-4-fast-reasoning"
 
 def call_llm(messages: List[Dict], temperature=0.7, max_tokens=4000) -> str:
