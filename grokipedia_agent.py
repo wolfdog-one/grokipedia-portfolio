@@ -41,7 +41,7 @@ Requirements:
 - Add 2–3 clean Markdown tables (case comparison, master/slave morality, counterfactuals)
 - Bullet-point causal chains
 - End with References section (extract all citations)
-- ~1500 words total
+- Keep word count ~1500
 - Preserve all rigor and counterfactuals
 
 Raw sections:
@@ -65,8 +65,8 @@ topics = [
 ]
 
 print(f"Spawning {len(topics)} parallel research tasks...\n")
-research_futures = [research_task.remote(t) for t in topics]
-raw_sections = ray.get(research_futures)
+futures = [research_task.remote(t) for t in topics]
+raw_sections = ray.get(futures)
 
 print("Running final formatting task...\n")
 formatted_article = ray.get(format_task.remote(raw_sections))
