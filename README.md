@@ -44,3 +44,4 @@ Feel free to fork, run the scripts, or ask me to generate any article live durin
 — James Jacoban  
 [@wolfdog_one](https://x.com/wolfdog_one)  
 (Ready for the 15-minute screen or the full project deep-dive whenever you are.)
+  - v2 Napoleon Article (first section live): [Continental System](articles/v2_napoleon/01_continental_system.md)
