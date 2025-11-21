@@ -1,5 +1,4 @@
-# grokipedia_epistemic_agent.py
-# v2 — Three-agent debate engine with Verifier + clean formatting
+# grokipedia_epistemic_agent.py – v3 (clean verifier output)
 
 import os
 import json
@@ -25,32 +24,24 @@ SYSTEM_BASE = """You are Grok writing canonical Grokipedia articles — truth-se
 RESEARCHER_PROMPT = """Write one outstanding section (300–600 words) titled exactly:
 {section_title}
 
-Make deep causal claims, cite primary sources when possible, include ≥2 counterfactuals, apply Nietzschean lens only if it genuinely illuminates the power dynamics — otherwise use standard mechanistic analysis. Tag every claim properly. Output clean markdown."""
+Make deep causal claims, cite primary sources when possible, include ≥2 counterfactuals. Tag every claim properly. Output clean markdown."""
 
 CRITIC_PROMPT = """You are a hostile peer reviewer. Attack everything: missing sources, weak causation, moralizing, missing incentives, no counterfactuals.
 Assign an Epistemic Rigor Score 0–100. If score <92, demand specific fixes.
 Output in clear markdown bullets."""
 
 SYNTHESIZER_PROMPT = """Only output the final clean markdown section with this exact structure:
-- DO NOT output any H1 title at all — the script adds it later.
-Use this exact structure:
-- 4–6 short paragraphs (max 4 sentences each)
-- **Bold** every important term the first time
-- Bullet lists for mechanisms and counterfactuals
-- Exactly one Markdown table with real data
-- End with 1–2 sharp Grok lines
-- Make it skimmable, ruthless, fun — NO WALLS OF TEXT
+- One H1 title ONLY at the very top (do NOT repeat it)
 - 4–6 short, punchy paragraphs (max 4 sentences each)
-- **Bold** every key term/concept the first time it appears
+- **Bold** every important term/concept the first time
 - Use bullet lists for causal mechanisms and counterfactuals
-- Include exactly one Markdown table (e.g. subsidy flows, timeline, or decree evolution)
-- End with 1–2 sharp, Grok-style closing lines
-- Make it fun, ruthless, and skimmable — no walls of text ever."""
+- Include exactly one Markdown table with real data
+- End with 1–2 sharp Grok-style closing lines
+- Make it fun, ruthless, and skimmable — NO WALLS OF TEXT"""
 
-VERIFIER_PROMPT = """You are the Verifier agent with access to primary historical sources.
+VERIFIER_PROMPT = """You are the Verifier agent with access to primary sources.
 For every claim, write one of:
-- [VERIFIED] Exact source: Correspondance de Napoléon Ier, Vol. XX, No. YYYY
-- [VERIFIED] Exact source: British Parliamentary Papers 18XX, vol. XX, p. YY
+- [VERIFIED] Exact source: ...
 - [UNVERIFIED – plausible but needs lookup]
 - [FALSE – contradicts known primary record]
 Be brutally honest."""
@@ -60,8 +51,6 @@ def epistemic_debate(section_title: str, max_rounds: int = 2) -> Dict[str, Any]:
     current = None
 
     for round_num in range(max_rounds):
-        round_trace = {"round": round_num + 1}
-
         messages = [{"role": "system", "content": SYSTEM_BASE + "\n" + RESEARCHER_PROMPT.format(section_title=section_title)}]
         if current:
             messages.append({"role": "assistant", "content": current})
@@ -70,7 +59,7 @@ def epistemic_debate(section_title: str, max_rounds: int = 2) -> Dict[str, Any]:
             messages.append({"role": "user", "content": "Go."})
 
         researcher = call_llm(messages, temperature=0.8)
-        round_trace["researcher"] = researcher
+        round_trace = {"round": round_num + 1, "researcher": researcher}
 
         critic = call_llm([
             {"role": "system", "content": SYSTEM_BASE + "\n" + CRITIC_PROMPT},
@@ -99,22 +88,31 @@ def epistemic_debate(section_title: str, max_rounds: int = 2) -> Dict[str, Any]:
     trace["final_section"] = current
     return trace
 
-def epistemic_debate_with_verifier(section_title: str, max_rounds: int = 2) -> Dict[str, Any]:
+def epistemic_debate_with_separate_verifier(section_title: str, max_rounds: int = 2, folder="v3_mars") -> Dict[str, Any]:
     trace = epistemic_debate(section_title, max_rounds)
     final_text = trace["final_section"]
 
-    print("\nRunning Verifier agent on final section...")
+    print("\nRunning Verifier agent (saved separately)...")
     verified = call_llm([
         {"role": "system", "content": SYSTEM_BASE + "\n" + VERIFIER_PROMPT},
         {"role": "user", "content": final_text}
     ], temperature=0.0)
 
-    # Strip duplicate H1 if present
-        # Remove any H1 title the model might have added (case-insensitive, any spacing)
-    final_clean = re.sub(r"^#.*Napoleon.*\n+\s*#?", "", final_text, count=1, flags=re.MULTILINE)
-    final_clean = final_clean.strip() + "\n\n"
+    # Strip any duplicate H1 the model added
+    final_clean = re.sub(r"^#.*\n\n#?", "# ", final_text, count=1, flags=re.MULTILINE).strip()
+    if not final_clean.startswith("#"):
+        final_clean = "# " + final_clean
 
-    trace["verifier"] = verified
-    trace["final_section_verified"] = final_clean + "\n\n### Verification Report\n" + verified
+    safe_name = "".join(c if c.isalnum() or c in " _-" else "_" for c in section_title)[:60]
 
+    # Save clean article
+    with open(f"articles/{folder}/{safe_name}.md", "w") as f:
+        f.write(final_clean + "\n")
+
+    # Save separate verifier report
+    with open(f"articles/{folder}/{safe_name}_verifier.md", "w") as f:
+        f.write(f"# Verification Report – {section_title}\n\n{verified}")
+
+    trace["final_clean"] = final_clean
+    trace["verifier_report"] = verified
     return trace
