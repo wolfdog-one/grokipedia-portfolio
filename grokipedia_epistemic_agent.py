@@ -1,4 +1,4 @@
-# grokipedia_epistemic_agent.py – FINAL PRODUCTION VERSION (clean + end-of-article citations)
+# grokipedia_epistemic_agent.py – FINAL PRODUCTION (citations at end, clean H1)
 
 import os
 import re
@@ -17,28 +17,57 @@ def call_llm(messages: List[Dict], temperature=0.7, max_tokens=4000) -> str:
 
 SYSTEM_BASE = "You are Grok writing canonical Grokipedia articles — truth-seeking, citation-heavy, mechanistically deep."
 
-RESEARCHER_PROMPT = """Write one outstanding section titled exactly:\n{section_title}\nUse inline [1][2] citation markers. Collect all citations at the end of your output under ==References==. Include ≥2 counterfactuals. Output clean markdown."""
+RESEARCHER_PROMPT = """Write one outstanding section titled exactly:
+{section_title}
+Use inline [1][2] citation markers. Collect all citations at the end under ==References==.
+Include >=2 counterfactuals. Output clean markdown."""
 
 CRITIC_PROMPT = "Hostile peer review. Attack missing sources, weak causation, moralizing. Assign Epistemic Rigor Score 0-100. Demand fixes if <92."
 
 SYNTHESIZER_PROMPT = """Output ONLY the final clean markdown section:
-- One H1 title (short, 5–8 words max)
-- 5–7 ultra-short paragraphs (max 4 sentences)
+- One H1 title (short, 5-8 words max)
+- 5-7 ultra-short paragraphs (max 4 sentences)
 - **Bold** only key terms
 - Bullet lists + one table
-- 2–3 H2 subheadings
+- 2-3 H2 subheadings
 - Inline citations [1][2]
-- End with ==References== section listing all sources
+- End with ==References== listing all sources
 - Fun, ruthless, skimmable — NO WALLS OF TEXT"""
 
 VERIFIER_PROMPT = "For every claim, write one of:\n- [VERIFIED] Exact source: ...\n- [UNVERIFIED]\n- [FALSE]\nBe brutally honest."
 
 def epistemic_debate(section_title: str, max_rounds: int = 2) -> Dict[str, Any]:
-    # (same as before — unchanged)
-    # ... [keeping the same debate loop] ...
-    # (I'll skip the middle for brevity — it's identical to the working version)
+    trace = {"section_title": section_title, "timestamp": datetime.now().isoformat(), "rounds": []}
+    current = None
 
-    # ONLY CHANGE: final_section is now the clean markdown with end citations
+    for round_num in range(max_rounds):
+        messages = [{"role": "system", "content": SYSTEM_BASE + "\n" + RESEARCHER_PROMPT.format(section_title=section_title)}]
+        if current:
+            messages.append({"role": "assistant", "content": current})
+            messages.append({"role": "user", "content": "Round 2+. Incorporate Critic feedback and crush it."})
+        else:
+            messages.append({"role": "user", "content": "Go."})
+
+        researcher = call_llm(messages, temperature=0.8)
+        round_trace = {"round": round_num + 1, "researcher": researcher}
+
+        critic = call_llm([{"role": "system", "content": SYSTEM_BASE + "\n" + CRITIC_PROMPT}, {"role": "user", "content": researcher}], temperature=0.3)
+        round_trace["critic"] = critic
+
+        score_match = re.search(r"Epistemic Rigor Score[^\d]*(\d+)", critic)
+        score = int(score_match.group(1)) if score_match else 0
+        round_trace["score"] = score
+
+        final = call_llm([{"role": "system", "content": SYSTEM_BASE + "\n" + SYNTHESIZER_PROMPT}, {"role": "user", "content": f"Researcher:\n{researcher}\n\nCritic:\n{critic}"}], temperature=0.6)
+        round_trace["synthesizer"] = final
+
+        current = final
+        trace["rounds"].append(round_trace)
+        print(f"Section '{section_title}' -> Round {round_num+1} score: {score}/100")
+        if score >= 92:
+            print("CONVERGED")
+            break
+
     trace["final_section"] = current
     return trace
 
@@ -47,11 +76,11 @@ def epistemic_debate_with_separate_verifier(section_title: str, max_rounds: int 
     final_text = trace["final_section"]
 
     print("\nRunning Verifier (saved separately)...")
-    verified = call_llm([{"role": "system", "content": SYSTEM_BASE + "\n" + VERIFIER_PROMPT},
-                         {"role": "user", "content": final_text}], temperature=0.0)
+    verified = call_llm([{"role": "system", "content": SYSTEM_BASE + "\n" + VERIFIER_PROMPT}, {"role": "user", "content": final_text}], temperature=0.0)
 
-    # FINAL FIX: perfect H1, no double header
-    final_clean = re.sub(r"^#.*", f"# {section_title.split(':')[0].strip()}", final_text, count=1)
+    # Clean H1: use first part of title only
+    short_title = section_title.split(":")[0].strip().split("(")[0].strip()
+    final_clean = re.sub(r"^#.*", f"# {short_title}", final_text, count=1)
     final_clean = re.sub(r"\n\n#", "\n\n", final_clean)
 
     safe_name = "".join(c if c.isalnum() or c in " _-" else "_" for c in section_title)[:60]
@@ -60,7 +89,7 @@ def epistemic_debate_with_separate_verifier(section_title: str, max_rounds: int 
         f.write(final_clean + "\n")
 
     with open(f"articles/{folder}/{safe_name}_verifier.md", "w") as f:
-        f.write(f"# Verification Report – {section_title}\n\n{verified}")
+        f.write(f"# Verification Report - {section_title}\n\n{verified}")
 
     trace["final_clean"] = final_clean
     trace["verifier_report"] = verified
