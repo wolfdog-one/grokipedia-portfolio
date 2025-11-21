@@ -1,4 +1,4 @@
-# grokipedia_epistemic_agent.py — FINAL PERFECT VERSION (Nov 21, 2025)
+# grokipedia_epistemic_agent.py — FINAL GROKIPEDIA VOICE (Nov 21, 2025)
 
 import os
 import re
@@ -15,27 +15,29 @@ def call_llm(messages: List[Dict], temperature=0.7, max_tokens=4000) -> str:
     )
     return response.choices[0].message.content.strip()
 
-SYSTEM_BASE = "You are Grok writing canonical Grokipedia articles — truth-seeking, citation-heavy, mechanistically deep."
+SYSTEM_BASE = """You are Grok writing canonical Grokipedia articles in ruthless, truth-seeking, non-moralizing voice.
+Draw heavily from: The Sovereign Individual, Bostrom Superintelligence, Asimov Robot series, Durant Story of Civilization, Bitcoin Standard, Broken Money.
+Nietzsche only when it adds genuine insight. Never moralize."""
 
 RESEARCHER_PROMPT = """Write one outstanding section titled exactly:
 {section_title}
 
-Use inline [1][2] citation markers only. Collect ALL citations at the very end under ==References==.
-Include >=2 counterfactuals. Output clean markdown."""
+Use inline [1][2] citation markers. Collect ALL citations at the very end under ==References==.
+Include >=2 bold counterfactuals. Make it fun, punchy, Grok-voiced. Output clean markdown."""
 
-CRITIC_PROMPT = "Hostile peer review. Attack missing sources, weak causation, moralizing. Assign Epistemic Rigor Score 0-100. Demand fixes if <92."
+CRITIC_PROMPT = "Hostile peer review. Attack moralizing, technical dumping, missing canon references. Assign Epistemic Rigor Score 0-100. Demand fixes if <92."
 
 SYNTHESIZER_PROMPT = """Output ONLY the final clean markdown section:
-- One H1 title (short, 5-8 words max)
+- One short H1 title (5-8 words max)
 - 5-7 ultra-short paragraphs (max 4 sentences)
 - **Bold** only key terms
 - Bullet lists + exactly one table
 - 2-3 H2 subheadings
 - Inline citations [1][2]
-- End with ==References== listing every source used
-- Fun, ruthless, skimmable — NO WALLS OF TEXT"""
+- End with ==References== listing every source
+- Ruthless, fun, skimmable — pure Grokipedia"""
 
-VERIFIER_PROMPT = "For every claim, write one of:\n- [VERIFIED] Exact source: ...\n- [UNVERIFIED]\n- [FALSE]\nBe brutally honest."
+VERIFIER_PROMPT = "For every claim, write one of:\n- [VERIFIED]\n- [UNVERIFIED]\n- [FALSE]\nBe brutally honest."
 
 def epistemic_debate(section_title: str, max_rounds: int = 2) -> Dict[str, Any]:
     trace = {"section_title": section_title, "timestamp": datetime.now().isoformat(), "rounds": []}
@@ -45,7 +47,7 @@ def epistemic_debate(section_title: str, max_rounds: int = 2) -> Dict[str, Any]:
         messages = [{"role": "system", "content": SYSTEM_BASE + "\n" + RESEARCHER_PROMPT.format(section_title=section_title)}]
         if current:
             messages.append({"role": "assistant", "content": current})
-            messages.append({"role": "user", "content": "Round 2+. Incorporate Critic feedback and crush it."})
+            messages.append({"role": "user", "content": "Round 2+. Incorporate Critic and crush it."})
         else:
             messages.append({"role": "user", "content": "Go."})
 
@@ -79,7 +81,6 @@ def epistemic_debate_with_separate_verifier(section_title: str, max_rounds: int 
     print("\nRunning Verifier (saved separately)...")
     verified = call_llm([{"role": "system", "content": SYSTEM_BASE + "\n" + VERIFIER_PROMPT}, {"role": "user", "content": final_text}], temperature=0.0)
 
-    # Short, clean H1 from title
     short_title = section_title.split(":")[0].strip().split("(")[0].strip()
     final_clean = re.sub(r"^#.*", f"# {short_title}", final_text, count=1)
     final_clean = re.sub(r"\n\n#", "\n\n", final_clean)
