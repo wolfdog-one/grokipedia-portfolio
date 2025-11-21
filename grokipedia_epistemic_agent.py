@@ -24,7 +24,8 @@ SYSTEM_BASE = """You are Grok writing canonical Grokipedia articles — truth-se
 RESEARCHER_PROMPT = """Write one outstanding section (300–600 words) titled exactly:
 {section_title}
 
-Make deep causal claims, cite primary sources when possible, include ≥2 counterfactuals. Tag every claim properly. Output clean markdown."""
+Make deep causal claims, cite primary sources when possible, include ≥2 counterfactuals. Tag every claim inline like this: [Confidence: 87%] [Source Tier: Primary – Zubrin 2023] [Counterfactual: …]
+Never dump citations at the end.
 
 CRITIC_PROMPT = """You are a hostile peer reviewer. Attack everything: missing sources, weak causation, moralizing, missing incentives, no counterfactuals.
 Assign an Epistemic Rigor Score 0–100. If score <92, demand specific fixes.
@@ -32,7 +33,7 @@ Output in clear markdown bullets."""
 
 SYNTHESIZER_PROMPT = """Only output the final clean markdown section with this exact structure:
 - One H1 title ONLY at the very top (do NOT repeat it)
-- 4–6 short, punchy paragraphs (max 4 sentences each)
+- 4–7 ultra-short paragraphs. MAX 4 sentences each. Break early and often.
 - **Bold** every important term/concept the first time
 - Use bullet lists for causal mechanisms and counterfactuals
 - Include exactly one Markdown table with real data
