@@ -1,4 +1,4 @@
-# grokipedia_epistemic_agent.py – FINAL PRODUCTION (citations at end, clean H1)
+# grokipedia_epistemic_agent.py — FINAL PERFECT VERSION (Nov 21, 2025)
 
 import os
 import re
@@ -19,7 +19,8 @@ SYSTEM_BASE = "You are Grok writing canonical Grokipedia articles — truth-seek
 
 RESEARCHER_PROMPT = """Write one outstanding section titled exactly:
 {section_title}
-Use inline [1][2] citation markers. Collect all citations at the end under ==References==.
+
+Use inline [1][2] citation markers only. Collect ALL citations at the very end under ==References==.
 Include >=2 counterfactuals. Output clean markdown."""
 
 CRITIC_PROMPT = "Hostile peer review. Attack missing sources, weak causation, moralizing. Assign Epistemic Rigor Score 0-100. Demand fixes if <92."
@@ -28,10 +29,10 @@ SYNTHESIZER_PROMPT = """Output ONLY the final clean markdown section:
 - One H1 title (short, 5-8 words max)
 - 5-7 ultra-short paragraphs (max 4 sentences)
 - **Bold** only key terms
-- Bullet lists + one table
+- Bullet lists + exactly one table
 - 2-3 H2 subheadings
 - Inline citations [1][2]
-- End with ==References== listing all sources
+- End with ==References== listing every source used
 - Fun, ruthless, skimmable — NO WALLS OF TEXT"""
 
 VERIFIER_PROMPT = "For every claim, write one of:\n- [VERIFIED] Exact source: ...\n- [UNVERIFIED]\n- [FALSE]\nBe brutally honest."
@@ -78,12 +79,12 @@ def epistemic_debate_with_separate_verifier(section_title: str, max_rounds: int 
     print("\nRunning Verifier (saved separately)...")
     verified = call_llm([{"role": "system", "content": SYSTEM_BASE + "\n" + VERIFIER_PROMPT}, {"role": "user", "content": final_text}], temperature=0.0)
 
-    # Clean H1: use first part of title only
+    # Short, clean H1 from title
     short_title = section_title.split(":")[0].strip().split("(")[0].strip()
     final_clean = re.sub(r"^#.*", f"# {short_title}", final_text, count=1)
     final_clean = re.sub(r"\n\n#", "\n\n", final_clean)
 
-    safe_name = "".join(c if c.isalnum() or c in " _-" else "_" for c in section_title)[:60]
+    safe_name = re.sub(r"[^\w \-]", "_", section_title)[:60].strip("_")
 
     with open(f"articles/{folder}/{safe_name}.md", "w") as f:
         f.write(final_clean + "\n")
