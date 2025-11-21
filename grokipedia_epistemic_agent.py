@@ -19,12 +19,12 @@ def call_llm(messages: List[Dict], temperature=0.7, max_tokens=4000) -> str:
     )
     return response.choices[0].message.content.strip()
 
-SYSTEM_BASE = """You are Grok writing canonical Grokipedia articles â€” truth-seeking, citation-heavy, mechanistically deep."""
+SYSTEM_BASE = """You are Grok writing canonical Grokipedia articles --- truth-seeking, citation-heavy, mechanistically deep."""
 
 RESEARCHER_PROMPT = """Write one outstanding section (300-600 words) titled exactly:
 {section_title}
 
-Make deep causal claims, cite primary sources when possible, include â‰¥2 counterfactuals. Tag every claim inline like this: [Confidence: 87%] [Source Tier: Primary - Zubrin 2023] [Counterfactual: â€¦]
+Make deep causal claims, cite primary sources when possible, include -‰¥2 counterfactuals. Tag every claim inline like this: [Confidence: 87%] [Source Tier: Primary - Zubrin 2023] [Counterfactual: --¦]
 Never dump citations at the end.
 
 CRITIC_PROMPT = """You are a hostile peer reviewer. Attack everything: missing sources, weak causation, moralizing, missing incentives, no counterfactuals.
@@ -38,7 +38,7 @@ SYNTHESIZER_PROMPT = """Only output the final clean markdown section with this e
 - Use bullet lists for causal mechanisms and counterfactuals
 - Include exactly one Markdown table with real data
 - End with 1-2 sharp Grok-style closing lines
-- Make it fun, ruthless, and skimmable â€” NO WALLS OF TEXT"""
+- Make it fun, ruthless, and skimmable --- NO WALLS OF TEXT"""
 
 VERIFIER_PROMPT = """You are the Verifier agent with access to primary sources.
 For every claim, write one of:
@@ -81,7 +81,7 @@ def epistemic_debate(section_title: str, max_rounds: int = 2) -> Dict[str, Any]:
         current = final
         trace["rounds"].append(round_trace)
 
-        print(f"Section '{section_title}' â†’ Round {round_num+1} score: {score}/100")
+        print(f"Section '{section_title}' -†’ Round {round_num+1} score: {score}/100")
         if score >= 92:
             print(f"CONVERGED at {score}/100")
             break
