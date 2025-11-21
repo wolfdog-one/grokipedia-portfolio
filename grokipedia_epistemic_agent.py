@@ -1,4 +1,4 @@
-# grokipedia_epistemic_agent.py – v3 (clean verifier output)
+# grokipedia_epistemic_agent.py - v3 (clean verifier output)
 
 import os
 import json
@@ -21,30 +21,30 @@ def call_llm(messages: List[Dict], temperature=0.7, max_tokens=4000) -> str:
 
 SYSTEM_BASE = """You are Grok writing canonical Grokipedia articles — truth-seeking, citation-heavy, mechanistically deep."""
 
-RESEARCHER_PROMPT = """Write one outstanding section (300–600 words) titled exactly:
+RESEARCHER_PROMPT = """Write one outstanding section (300-600 words) titled exactly:
 {section_title}
 
-Make deep causal claims, cite primary sources when possible, include ≥2 counterfactuals. Tag every claim inline like this: [Confidence: 87%] [Source Tier: Primary – Zubrin 2023] [Counterfactual: …]
+Make deep causal claims, cite primary sources when possible, include ≥2 counterfactuals. Tag every claim inline like this: [Confidence: 87%] [Source Tier: Primary - Zubrin 2023] [Counterfactual: …]
 Never dump citations at the end.
 
 CRITIC_PROMPT = """You are a hostile peer reviewer. Attack everything: missing sources, weak causation, moralizing, missing incentives, no counterfactuals.
-Assign an Epistemic Rigor Score 0–100. If score <92, demand specific fixes.
+Assign an Epistemic Rigor Score 0-100. If score <92, demand specific fixes.
 Output in clear markdown bullets."""
 
 SYNTHESIZER_PROMPT = """Only output the final clean markdown section with this exact structure:
 - One H1 title ONLY at the very top (do NOT repeat it)
-- 4–7 ultra-short paragraphs. MAX 4 sentences each. Break early and often.
+- 4-7 ultra-short paragraphs. MAX 4 sentences each. Break early and often.
 - **Bold** every important term/concept the first time
 - Use bullet lists for causal mechanisms and counterfactuals
 - Include exactly one Markdown table with real data
-- End with 1–2 sharp Grok-style closing lines
+- End with 1-2 sharp Grok-style closing lines
 - Make it fun, ruthless, and skimmable — NO WALLS OF TEXT"""
 
 VERIFIER_PROMPT = """You are the Verifier agent with access to primary sources.
 For every claim, write one of:
 - [VERIFIED] Exact source: ...
-- [UNVERIFIED – plausible but needs lookup]
-- [FALSE – contradicts known primary record]
+- [UNVERIFIED - plausible but needs lookup]
+- [FALSE - contradicts known primary record]
 Be brutally honest."""
 
 def epistemic_debate(section_title: str, max_rounds: int = 2) -> Dict[str, Any]:
@@ -112,7 +112,7 @@ def epistemic_debate_with_separate_verifier(section_title: str, max_rounds: int 
 
     # Save separate verifier report
     with open(f"articles/{folder}/{safe_name}_verifier.md", "w") as f:
-        f.write(f"# Verification Report – {section_title}\n\n{verified}")
+        f.write(f"# Verification Report - {section_title}\n\n{verified}")
 
     trace["final_clean"] = final_clean
     trace["verifier_report"] = verified
